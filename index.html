@@ -1,107 +1,715 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Click The Box</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #0f172a;
-        color: white;
-        overflow: hidden;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click The Box Challenge</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    #ui {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        font-size: 18px;
-    }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
 
-    #box {
-        width: 60px;
-        height: 60px;
-        background: #22c55e;
-        position: absolute;
-        border-radius: 12px;
-        display: none;
-        cursor: pointer;
-    }
+        /* Animated background particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
 
-    #start {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        padding: 15px 30px;
-        font-size: 20px;
-        border: none;
-        border-radius: 12px;
-        background: #38bdf8;
-        color: black;
-        cursor: pointer;
-    }
-</style>
+        .particle {
+            position: absolute;
+            background-color: rgba(59, 130, 246, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-100px) translateX(100px); }
+            100% { transform: translateY(0) translateX(0); }
+        }
+
+        /* Game container */
+        .game-container {
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .game-header {
+            padding: 20px 30px;
+            background: rgba(30, 41, 59, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #38bdf8, #22c55e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .game-title i {
+            font-size: 2.5rem;
+        }
+
+        /* Stats panel */
+        .stats-container {
+            display: flex;
+            gap: 25px;
+        }
+
+        .stat-box {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 12px;
+            padding: 15px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.6);
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #38bdf8;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Game area */
+        .game-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* Target box */
+        #box {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            position: absolute;
+            border-radius: 18px;
+            display: none;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.1s, box-shadow 0.2s;
+            z-index: 10;
+        }
+
+        #box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.6);
+        }
+
+        #box:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(34, 197, 94, 0.8);
+        }
+
+        /* Start screen */
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            transition: opacity 0.5s;
+        }
+
+        .start-screen h2 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #38bdf8, #22c55e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .start-screen p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            margin-bottom: 40px;
+            max-width: 600px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        #start {
+            padding: 18px 45px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(90deg, #38bdf8, #22c55e);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #start:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(56, 189, 248, 0.6);
+        }
+
+        #start:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 15px rgba(56, 189, 248, 0.8);
+        }
+
+        /* Instructions */
+        .instructions {
+            margin-top: 40px;
+            background: rgba(30, 41, 59, 0.7);
+            padding: 20px 30px;
+            border-radius: 15px;
+            max-width: 600px;
+        }
+
+        .instructions h3 {
+            color: #38bdf8;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions ul {
+            list-style-type: none;
+        }
+
+        .instructions li {
+            padding: 8px 0;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions i {
+            color: #22c55e;
+        }
+
+        /* Time bar */
+        .time-bar-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 6px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .time-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #38bdf8);
+            width: 100%;
+            border-radius: 6px;
+            transition: width 1s linear;
+        }
+
+        /* Game over screen */
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .game-over h2 {
+            font-size: 4rem;
+            color: #f87171;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #38bdf8;
+            margin: 20px 0;
+            text-shadow: 0 5px 15px rgba(56, 189, 248, 0.5);
+        }
+
+        .score-message {
+            font-size: 1.5rem;
+            color: #cbd5e1;
+            margin-bottom: 40px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .game-btn {
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .play-again {
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .main-menu {
+            background: rgba(30, 41, 59, 0.9);
+            color: #38bdf8;
+            border: 2px solid #38bdf8;
+        }
+
+        .game-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Click effect */
+        .click-effect {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.7);
+            pointer-events: none;
+            animation: click-animation 0.5s forwards;
+            z-index: 5;
+        }
+
+        @keyframes click-animation {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .game-container {
+                height: 95vh;
+                border-radius: 10px;
+            }
+            
+            .game-header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .stats-container {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .stat-box {
+                min-width: 100px;
+                padding: 12px 15px;
+            }
+            
+            .start-screen h2 {
+                font-size: 2.5rem;
+                text-align: center;
+            }
+            
+            .final-score {
+                font-size: 3.5rem;
+            }
+            
+            .buttons {
+                flex-direction: column;
+                width: 80%;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Animated background particles -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Game container -->
+    <div class="game-container">
+        <!-- Game header -->
+        <div class="game-header">
+            <div class="game-title">
+                <i class="fas fa-gamepad"></i>
+                <span>Click The Box Challenge</span>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value" id="time">30</div>
+                    <div class="stat-label">Time Left</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="stat-value" id="cps">0.0</div>
+                    <div class="stat-label">Clicks/Sec</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Time bar -->
+        <div class="time-bar-container">
+            <div class="time-bar" id="timeBar"></div>
+        </div>
+        
+        <!-- Game area -->
+        <div class="game-area">
+            <!-- Target box -->
+            <div id="box"></div>
+            
+            <!-- Start screen -->
+            <div class="start-screen" id="startScreen">
+                <h2>Click The Box Challenge</h2>
+                <p>Test your reflexes and accuracy! Click the green box as many times as you can before time runs out. The box will move each time you click it.</p>
+                
+                <button id="start">
+                    <i class="fas fa-play-circle"></i>
+                    START GAME
+                </button>
+                
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> How to Play</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Click the green box to score points</li>
+                        <li><i class="fas fa-check-circle"></i> The box moves to a random location after each click</li>
+                        <li><i class="fas fa-check-circle"></i> You have 30 seconds to score as many points as possible</li>
+                        <li><i class="fas fa-check-circle"></i> Try to achieve the highest clicks per second (CPS)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Game over screen -->
+            <div class="game-over" id="gameOver">
+                <h2>GAME OVER</h2>
+                <div class="final-score" id="finalScore">0</div>
+                <div class="score-message" id="scoreMessage">Nice try! Can you do better?</div>
+                
+                <div class="buttons">
+                    <button class="game-btn play-again" id="playAgain">
+                        <i class="fas fa-redo"></i>
+                        PLAY AGAIN
+                    </button>
+                    <button class="game-btn main-menu" id="mainMenu">
+                        <i class="fas fa-home"></i>
+                        MAIN MENU
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div id="ui">
-    ⏱ Time: <span id="time">30</span><br>
-    ⭐ Score: <span id="score">0</span>
-</div>
-
-<button id="start">Start Game</button>
-<div id="box"></div>
-
-<script>
-    const box = document.getElementById("box");
-    const startBtn = document.getElementById("start");
-    const scoreEl = document.getElementById("score");
-    const timeEl = document.getElementById("time");
-
-    let score = 0;
-    let time = 30;
-    let timer;
-
-    function randomPosition() {
-        const maxX = window.innerWidth - 60;
-        const maxY = window.innerHeight - 60;
-        box.style.left = Math.random() * maxX + "px";
-        box.style.top = Math.random() * maxY + "px";
-    }
-
-    box.onclick = () => {
-        score++;
-        scoreEl.textContent = score;
-        randomPosition();
-    };
-
-    startBtn.onclick = () => {
-        score = 0;
-        time = 30;
-        scoreEl.textContent = score;
-        timeEl.textContent = time;
-
-        startBtn.style.display = "none";
-        box.style.display = "block";
-        randomPosition();
-
-        timer = setInterval(() => {
+    <script>
+        // DOM elements
+        const box = document.getElementById("box");
+        const startBtn = document.getElementById("start");
+        const playAgainBtn = document.getElementById("playAgain");
+        const mainMenuBtn = document.getElementById("mainMenu");
+        const scoreEl = document.getElementById("score");
+        const timeEl = document.getElementById("time");
+        const cpsEl = document.getElementById("cps");
+        const timeBar = document.getElementById("timeBar");
+        const startScreen = document.getElementById("startScreen");
+        const gameOverScreen = document.getElementById("gameOver");
+        const finalScoreEl = document.getElementById("finalScore");
+        const scoreMessageEl = document.getElementById("scoreMessage");
+        const particlesContainer = document.getElementById("particles");
+        
+        // Game variables
+        let score = 0;
+        let time = 30;
+        let timer;
+        let gameActive = false;
+        let startTime;
+        let clickTimes = [];
+        
+        // Create background particles
+        function createParticles() {
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement("div");
+                particle.classList.add("particle");
+                const size = Math.random() * 10 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+                particle.style.backgroundColor = `rgba(${Math.floor(Math.random() * 100)}, ${Math.floor(Math.random() * 200) + 55}, ${Math.floor(Math.random() * 255)}, ${Math.random() * 0.5 + 0.2})`;
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Create click effect animation
+        function createClickEffect(x, y) {
+            const effect = document.createElement("div");
+            effect.classList.add("click-effect");
+            effect.style.left = `${x - 15}px`;
+            effect.style.top = `${y - 15}px`;
+            document.querySelector(".game-area").appendChild(effect);
+            
+            setTimeout(() => {
+                effect.remove();
+            }, 500);
+        }
+        
+        // Calculate clicks per second
+        function calculateCPS() {
+            const now = Date.now();
+            // Keep only clicks from the last second
+            clickTimes = clickTimes.filter(time => now - time < 1000);
+            cpsEl.textContent = clickTimes.length.toFixed(1);
+        }
+        
+        // Get random position for the box
+        function randomPosition() {
+            const gameArea = document.querySelector(".game-area");
+            const maxX = gameArea.clientWidth - 70;
+            const maxY = gameArea.clientHeight - 70;
+            
+            box.style.left = Math.random() * maxX + "px";
+            box.style.top = Math.random() * maxY + "px";
+            
+            // Add a subtle rotation for visual interest
+            box.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+        }
+        
+        // Handle box click
+        box.onclick = (e) => {
+            if (!gameActive) return;
+            
+            // Create click effect
+            createClickEffect(e.clientX, e.clientY);
+            
+            // Update score
+            score++;
+            scoreEl.textContent = score;
+            
+            // Record click time for CPS calculation
+            clickTimes.push(Date.now());
+            calculateCPS();
+            
+            // Move box to new random position
+            randomPosition();
+            
+            // Add a quick animation
+            box.style.transform = "scale(0.9)";
+            setTimeout(() => {
+                box.style.transform = "scale(1)";
+            }, 100);
+        };
+        
+        // Start the game
+        function startGame() {
+            // Reset game state
+            score = 0;
+            time = 30;
+            gameActive = true;
+            clickTimes = [];
+            
+            // Update UI
+            scoreEl.textContent = score;
+            timeEl.textContent = time;
+            cpsEl.textContent = "0.0";
+            timeBar.style.width = "100%";
+            startScreen.style.display = "none";
+            gameOverScreen.style.display = "none";
+            box.style.display = "block";
+            
+            // Start timer
+            startTime = Date.now();
+            timer = setInterval(updateTimer, 1000);
+            
+            // Position the box
+            randomPosition();
+        }
+        
+        // Update timer
+        function updateTimer() {
             time--;
             timeEl.textContent = time;
-
-            if (time <= 0) {
-                clearInterval(timer);
-                box.style.display = "none";
-                startBtn.style.display = "block";
-                startBtn.textContent = "Play Again";
-                alert("Game Over!\nScore: " + score);
+            
+            // Update time bar
+            const percent = (time / 30) * 100;
+            timeBar.style.width = `${percent}%`;
+            
+            // Change color when time is running low
+            if (time <= 10) {
+                timeBar.style.background = "linear-gradient(90deg, #ef4444, #f87171)";
+                timeEl.style.color = "#f87171";
+                
+                // Add a pulsing animation for low time
+                timeEl.style.animation = "none";
+                setTimeout(() => {
+                    timeEl.style.animation = "pulse 0.5s infinite alternate";
+                }, 10);
             }
-        }, 1000);
-    };
-</script>
-
+            
+            // End game when time runs out
+            if (time <= 0) {
+                endGame();
+            }
+        }
+        
+        // End the game
+        function endGame() {
+            gameActive = false;
+            clearInterval(timer);
+            box.style.display = "none";
+            
+            // Calculate final stats
+            const gameDuration = (Date.now() - startTime) / 1000;
+            const cps = score / gameDuration;
+            
+            // Update game over screen
+            finalScoreEl.textContent = score;
+            
+            // Set score message based on performance
+            if (score === 0) {
+                scoreMessageEl.textContent = "You didn't click the box! Try again!";
+            } else if (score < 10) {
+                scoreMessageEl.textContent = "Good start! Keep practicing!";
+            } else if (score < 25) {
+                scoreMessageEl.textContent = "Nice job! You're getting better!";
+            } else if (score < 50) {
+                scoreMessageEl.textContent = "Great score! You have fast reflexes!";
+            } else {
+                scoreMessageEl.textContent = "Amazing! You're a clicking champion!";
+            }
+            
+            // Show game over screen
+            gameOverScreen.style.display = "flex";
+        }
+        
+        // Initialize the game
+        function init() {
+            // Create particles
+            createParticles();
+            
+            // Event listeners
+            startBtn.onclick = startGame;
+            playAgainBtn.onclick = startGame;
+            
+            mainMenuBtn.onclick = () => {
+                gameOverScreen.style.display = "none";
+                startScreen.style.display = "flex";
+            };
+            
+            // Add a subtle animation to the start button
+            startBtn.style.animation = "pulse 2s infinite";
+            
+            // Add CSS for pulse animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse {
+                    0% { transform: translateY(-5px) scale(1); }
+                    50% { transform: translateY(-5px) scale(1.05); }
+                    100% { transform: translateY(-5px) scale(1); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Initialize when page loads
+        window.onload = init;
+    </script>
 </body>
 </html>
