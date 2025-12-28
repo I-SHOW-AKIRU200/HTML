@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Click The Box</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0f172a;
+        color: white;
+        overflow: hidden;
+    }
+
+    #ui {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        font-size: 18px;
+    }
+
+    #box {
+        width: 60px;
+        height: 60px;
+        background: #22c55e;
+        position: absolute;
+        border-radius: 12px;
+        display: none;
+        cursor: pointer;
+    }
+
+    #start {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        padding: 15px 30px;
+        font-size: 20px;
+        border: none;
+        border-radius: 12px;
+        background: #38bdf8;
+        color: black;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<div id="ui">
+    ⏱ Time: <span id="time">30</span><br>
+    ⭐ Score: <span id="score">0</span>
+</div>
+
+<button id="start">Start Game</button>
+<div id="box"></div>
+
+<script>
+    const box = document.getElementById("box");
+    const startBtn = document.getElementById("start");
+    const scoreEl = document.getElementById("score");
+    const timeEl = document.getElementById("time");
+
+    let score = 0;
+    let time = 30;
+    let timer;
+
+    function randomPosition() {
+        const maxX = window.innerWidth - 60;
+        const maxY = window.innerHeight - 60;
+        box.style.left = Math.random() * maxX + "px";
+        box.style.top = Math.random() * maxY + "px";
+    }
+
+    box.onclick = () => {
+        score++;
+        scoreEl.textContent = score;
+        randomPosition();
+    };
+
+    startBtn.onclick = () => {
+        score = 0;
+        time = 30;
+        scoreEl.textContent = score;
+        timeEl.textContent = time;
+
+        startBtn.style.display = "none";
+        box.style.display = "block";
+        randomPosition();
+
+        timer = setInterval(() => {
+            time--;
+            timeEl.textContent = time;
+
+            if (time <= 0) {
+                clearInterval(timer);
+                box.style.display = "none";
+                startBtn.style.display = "block";
+                startBtn.textContent = "Play Again";
+                alert("Game Over!\nScore: " + score);
+            }
+        }, 1000);
+    };
+</script>
+
+</body>
+</html>
